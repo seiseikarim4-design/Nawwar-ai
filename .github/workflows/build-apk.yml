@@ -37,7 +37,22 @@ jobs:
       - name: Extract project
         run: |
           unzip -o NawwarAI-Android-Project.zip -d source
+            - name: Fix Java version
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("source/app/build.gradle.kts")
+          s = p.read_text()
+          fix = """    compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
 
+          """
+          if "sourceCompatibility" not in s:
+              s = s.replace("android {", "android {\n" + fix, 1)
+              p.write_text(s)
+          PY
       - name: Build APK
         run: |
           cd source
